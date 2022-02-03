@@ -3,6 +3,8 @@
 import gym
 import numpy as np
 import time
+import matplotlib.pyplot as plt
+
 
 env = gym.make("FrozenLake-v0")
 stateS = env.observation_space.n
@@ -10,7 +12,7 @@ actionS = env.action_space.n
 
 Q = np.zeros((stateS, actionS))
 
-episodeS = 1500
+episodeS = 10000
 max_stepS = 100
 
 learning_rate = 0.81
@@ -24,7 +26,7 @@ for episode in range(episodeS):
     state = env.reset()
     for _ in range(max_stepS):
         
-        env.render()
+        #env.render()
         
         if np.random.uniform(0,1) < epsilon:
             action = env.action_space.sample()
@@ -44,3 +46,15 @@ for episode in range(episodeS):
 
 print(Q)
 print(f"average reward: {sum(rewards)/len(rewards)}:")
+
+def get_average(values):
+    return sum(values) / len(values)
+
+avg_rewards = []
+for i in range(0, len(rewards), 100):
+    avg_rewards.append(get_average(rewards[i:i+100]))
+
+plt.plot(avg_rewards)
+plt.ylabel("average reward")
+plt.xlabel("episodes (100\'s)")
+plt.show()
