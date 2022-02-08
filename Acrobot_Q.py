@@ -1,28 +1,23 @@
 # -*- coding: utf-8 -*-
 
-def mapper(obs):
-    stat = 0
-    if obs[0] > 0:
-        stat += 1
-    if obs[1] > 0:
-        stat += 2
-    if obs[2] > 0:
-        stat += 4
-    if obs[3] > 0:
-        stat += 8
-    if obs[4] > 0:
-        stat += 16
-    if obs[5] > 0:
-        stat += 32
-    return stat
 
 import gym
 import numpy as np
 
+def mapper(obs):
+    stat = 0
+    stat += (1 + obs[0]) // 0.5
+    stat += ((1 + obs[1]) // 0.5) * 4
+    stat += ((1 + obs[2]) // 0.5) * 16
+    stat += ((1 + obs[3]) // 0.5) * 64
+    stat += (((4 * np.pi) + obs[4]) // (2 * np.pi)) * 256
+    stat += (((9 * np.pi) + obs[5]) // (4.5 * np.pi)) * 1024
+    return int(stat)
+
 env = gym.make("Acrobot-v1")
 
 
-Q = np.zeros((64, 3))
+Q = np.zeros((4096, 3))
 
 episodeS = 10
 max_stepS = 500
@@ -46,7 +41,8 @@ for episode in range(episodeS):
         
         next_observation, non_reward, done, _ = env.step(action)
         next_state = mapper(next_observation)
-        reward = 1 - 0.5 * (next_observation[0] * (1 + next_observation[2]))
+        #reward = 1 - 0.5 * (next_observation[0] * (1 + next_observation[2]))
+        reward = next_observation[5] ** 2
         
         Q[state, action] = Q[state, action] + learning_rate * (reward + discount * np.max(Q[next_state, :]) - Q[state, action]) # This function updates the Q-table
         
